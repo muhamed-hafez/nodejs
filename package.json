@@ -1,0 +1,14 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "This is a test application for learning node.js",
+  "main": "Shape.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Muhamed Hafez",
+  "license": "ISC",
+  "dependencies": {
+    "yargs": "^6.3.0"
+  }
+}
