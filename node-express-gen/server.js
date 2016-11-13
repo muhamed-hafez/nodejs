@@ -1,6 +1,8 @@
 var assert = require("assert");
 var mongoose = require("mongoose");
 var Dishes = require("./models/dishes.js");
+var Promotion = require("./models/promotions.js");
+var Leadership = require("./models/leadership.js");
 
 var url = "mongodb://localhost:27017/conFusion";
 
@@ -12,8 +14,50 @@ db.on("error", console.error.bind(console, "Connection error : "));
 db.once("open", function() {
     console.log("Succcessfully connected to the db driver");
 
+/*
+    var promotion = new Promotion({
+        name : "Weekend Grand Buffet",
+        "image": "images/buffet.png",
+        "label": "New",
+        "price": "19.99",
+        "description": "Featuring . . ."
+    });
+
+    promotion.save(function(err) {
+        assert.equal(err, null);
+        Promotion.find({}, function(err, promotions) {
+            assert.equal(err, null);
+            console.log(promotions);
+            db.collection("promotions").drop(function() {
+                db.close();
+            });
+        });
+    });
+*/
+    var leader = new Leadership({
+        "name": "Peter Pan",
+        "image": "images/alberto.png",
+        "designation": "Chief Epicurious Officer",
+        "abbr": "CEO",
+        "description": "Our CEO, Peter, . . ."
+    });
+
+    leader.save(function(err) {
+        assert.equal(err, null);
+        Leadership.find({}, function(err, leaders) {
+            assert.equal(err, null);
+            console.log(leaders);
+            db.collection("leaderships").drop(function() {
+                db.close();
+            });
+        });
+    });
+/*
     Dishes.create({
         name : "Fatta",
+        image : "images/uthapizza.png",
+        category : "mains",
+        price : "4.99",
         description : "A very popular egyptian meal",
         comments : [
             {
@@ -60,4 +104,5 @@ db.once("open", function() {
             });
         }, 3000);
     });
+    */
 });

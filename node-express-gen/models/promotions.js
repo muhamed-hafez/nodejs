@@ -1,23 +1,15 @@
 var mongoose = require("mongoose");
-var comments = require("./comments.js");
+var Schema = mongoose.Schema;
+
 require("mongoose-currency").loadType(mongoose);
 var Currency = mongoose.Types.Currency;
 
-var commentSchema = comments.commentSchema;
-
-var Schema = mongoose.Schema;
-
-var dishSchema = new Schema({
+var promotionSchema = new Schema({
     name : {
         type : String,
-        required : true,
-        unique : true
+        required : true
     },
     image : {
-        type : String,
-        required : true,
-    },
-    category : {
         type : String,
         required : true
     },
@@ -33,12 +25,9 @@ var dishSchema = new Schema({
     description : {
         type : String,
         required : true
-    },
-    comments : [commentSchema]
-}, {
-    timestamps : true
+    }
 });
 
-var Dishes = mongoose.model("Dish", dishSchema);
+var Promotion = mongoose.model("Promotion", promotionSchema);
 
-module.exports = Dishes;
+module.exports = Promotion;
