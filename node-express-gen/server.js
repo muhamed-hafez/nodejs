@@ -12,21 +12,33 @@ db.on("error", console.error.bind(console, "Connection error : "));
 db.once("open", function() {
     console.log("Succcessfully connected to the db driver");
 
-    var dish = Dishes({
-        name : "Pizza",
-        description : "Test"
-    });
-
-    dish.save(function(err) {
+    Dishes.create({
+        name : "Fatta",
+        description : "A very popular egyptian meal"
+    }, function(err, dish) {
         assert.equal(err, null);
 
-        Dishes.find({}, function(err, dishes) {
-            assert.equal(err, null);
-            console.log(dishes);
+        console.log("Dish created!");
+        console.log(dish);
+        var id = dish._id;
 
-            db.collection("dishes").drop(function() {
-                db.close();
+        setTimeout(function() {
+            Dishes.findByIdAndUpdate(id, {
+                $set : {
+                    description : "The best meal ever"
+                }
+            }, {
+                new : true
+            })
+            .exec(function(err, dish) {
+                assert.equal(err, null);
+                console.log("Dish updated!");
+                console.log(dish);
+
+                db.collection("dishes").drop(function() {
+                    db.close();
+                });
             });
-        });
+        }, 3000);
     });
 });

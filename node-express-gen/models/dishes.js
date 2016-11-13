@@ -12,7 +12,7 @@ var dishSchema = new Schema({
         required : true
     }
 }, {
-    timestamp : true
+    timestamps : true
 });
 
 var Dishes = mongoose.model("Dish", dishSchema);
