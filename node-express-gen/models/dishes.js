@@ -1,4 +1,8 @@
 var mongoose = require("mongoose");
+var comments = require("./comments.js");
+
+var commentSchema = comments.commentSchema;
+
 var Schema = mongoose.Schema;
 
 var dishSchema = new Schema({
@@ -10,7 +14,8 @@ var dishSchema = new Schema({
     description : {
         type : String,
         required : true
-    }
+    },
+    comments : [commentSchema]
 }, {
     timestamps : true
 });

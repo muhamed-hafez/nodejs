@@ -14,7 +14,14 @@ db.once("open", function() {
 
     Dishes.create({
         name : "Fatta",
-        description : "A very popular egyptian meal"
+        description : "A very popular egyptian meal",
+        comments : [
+            {
+                rating : 5,
+                comment : "This was very delecious",
+                author : "Muhamed Hafez"
+            }
+        ]
     }, function(err, dish) {
         assert.equal(err, null);
 
@@ -35,8 +42,20 @@ db.once("open", function() {
                 console.log("Dish updated!");
                 console.log(dish);
 
-                db.collection("dishes").drop(function() {
-                    db.close();
+                dish.comments.push({
+                    rating : 4,
+                    comment : "I really enjoyed it, but it was a little spicy",
+                    author : "Mohamed Shehata"
+                });
+
+                dish.save(function(err, dish) {
+                    assert.equal(err, null);
+                    console.log("Comments updated!");
+                    console.log(dish);
+
+                    db.collection("dishes").drop(function() {
+                        db.close();
+                    });
                 });
             });
         }, 3000);
