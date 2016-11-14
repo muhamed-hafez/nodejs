@@ -26,6 +26,8 @@ var promotionSchema = new Schema({
         type : String,
         required : true
     }
+}, {
+    timestamps : true
 });
 
 var Promotion = mongoose.model("Promotion", promotionSchema);
