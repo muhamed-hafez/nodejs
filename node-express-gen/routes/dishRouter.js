@@ -52,4 +52,64 @@ dishRouter.route('/:dishId')
     });
 });
 
+dishRouter.route('/:dishId/comments')
+.get(function(req, res, next) {
+    Dish.findById(req.params.dishId, function(err, dish) {
+        assert.equal(err, null);
+        res.json(dish.comments);
+    });
+})
+.post(function(req, res, next) {
+    Dish.findById(req.params.dishId, function(err, dish) {
+        assert.equal(err, null);
+        dish.comments.push(req.body);
+        dish.save(function(err, dish) {
+            assert.equal(err, null);
+            res.json(dish);
+        });
+    });
+})
+.delete(function(req, res, next) {
+    Dish.findById(req.params.dishId, function(err, dish) {
+        assert.equal(err, null);
+        for (comment of dish.comments) {
+            comment.remove();
+        }
+        dish.save(function(err, dish) {
+            assert.equal(err, null);
+            res.writeHead(200, {'Content-Type' : 'text/plain'});
+            res.end('Comments deleted successfully');
+        });
+    });
+});
+
+dishRouter.route('/:dishId/comments/:commentId')
+.get(function(req, res, next) {
+    Dish.findById(req.params.dishId, function(err, dish) {
+        assert.equal(err, null);
+        res.json(dish.comments.id(req.params.commentId));
+    });
+})
+.put(function(req, res, next) {
+    Dish.findById(req.params.dishId, function(err, dish) {
+        assert.equal(err, null);
+        dish.comments.id(req.params.commentId).remove();
+        dish.comments.push(req.body);
+        dish.save(function(err, dish) {
+            assert.equal(err, null);
+            res.json(dish);
+        });
+    });
+})
+.delete(function(req, res, next) {
+    Dish.findById(req.params.dishId, function(err, dish) {
+        assert.equal(err, null);
+        dish.comments.id(req.params.commentId).remove();
+        dish.save(function(err, dish) {
+            assert.equal(err, null);
+            res.json(dish);
+        });
+    });
+});
+
 module.exports = dishRouter;
