@@ -3,25 +3,26 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var assert = require('assert');
 var Dish = require('../models/dishes');
+var Verify = require('./verify');
 
 var dishRouter = express.Router();
 dishRouter.use(bodyParser.json());
 
 dishRouter.route('/')
-.get(function(req, res, next) {
+.get(Verify.verifyOrdinaryUser, function(req, res, next) {
     Dish.find({}, function(err, dishes) {
         assert.equal(err, null);
         res.json(dishes);
     });
 })
-.post(function(req, res, next) {
+.post(Verify.verifyOrdinaryUser, function(req, res, next) {
     Dish.create(req.body, function(err, dish) {
         assert.equal(err, null);
         res.writeHead(200, {'Content-Type' : 'text/plain'});
         res.end('Created the dish with id ' + dish._id);
     });
 })
-.delete(function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, function(req, res, next) {
     Dish.remove({}, function(err, resp) {
         assert.equal(err, null);
         res.json(resp);
