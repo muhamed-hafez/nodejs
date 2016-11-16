@@ -17,6 +17,12 @@ var leaderRouter = require('./routes/leaderRouter');
 
 var app = express();
 
+app.all('*', function(req, res, next) {
+    if (req.secure) {
+        return next();
+    }
+    res.redirect('https://' + req.hostname + ':' + app.get('secPort') + req.url);
+});
 // connect to the database
 var url = 'mongodb://localhost:27017/conFusion';
 mongoose.connect(url);
