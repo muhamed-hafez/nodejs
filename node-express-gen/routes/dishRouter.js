@@ -15,14 +15,14 @@ dishRouter.route('/')
         res.json(dishes);
     });
 })
-.post(Verify.verifyOrdinaryUser, function(req, res, next) {
+.post(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.create(req.body, function(err, dish) {
         assert.equal(err, null);
         res.writeHead(200, {'Content-Type' : 'text/plain'});
         res.end('Created the dish with id ' + dish._id);
     });
 })
-.delete(Verify.verifyOrdinaryUser, function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.remove({}, function(err, resp) {
         assert.equal(err, null);
         res.json(resp);
@@ -36,7 +36,7 @@ dishRouter.route('/:dishId')
         res.json(dish);
     });
 })
-.put(function(req, res, next) {
+.put(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.findByIdAndUpdate(req.params.dishId, {
         $set : req.body
     }, {
@@ -46,7 +46,7 @@ dishRouter.route('/:dishId')
         res.json(dish);
     });
 })
-.delete(function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.findByIdAndRemove(req.params.dishId, function(err, resp) {
         assert.equal(err, null);
         res.json(resp);
