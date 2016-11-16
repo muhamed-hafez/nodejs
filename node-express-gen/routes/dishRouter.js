@@ -9,20 +9,21 @@ var dishRouter = express.Router();
 dishRouter.use(bodyParser.json());
 
 dishRouter.route('/')
-.get(Verify.verifyOrdinaryUser, function(req, res, next) {
+.all(Verify.verifyOrdinaryUser)
+.get(function(req, res, next) {
     Dish.find({}, function(err, dishes) {
         assert.equal(err, null);
         res.json(dishes);
     });
 })
-.post(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
+.post(Verify.verifyAdmin, function(req, res, next) {
     Dish.create(req.body, function(err, dish) {
         assert.equal(err, null);
         res.writeHead(200, {'Content-Type' : 'text/plain'});
         res.end('Created the dish with id ' + dish._id);
     });
 })
-.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
+.delete(Verify.verifyAdmin, function(req, res, next) {
     Dish.remove({}, function(err, resp) {
         assert.equal(err, null);
         res.json(resp);
@@ -30,13 +31,14 @@ dishRouter.route('/')
 });
 
 dishRouter.route('/:dishId')
+.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
         res.json(dish);
     });
 })
-.put(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
+.put(Verify.verifyAdmin, function(req, res, next) {
     Dish.findByIdAndUpdate(req.params.dishId, {
         $set : req.body
     }, {
@@ -46,7 +48,7 @@ dishRouter.route('/:dishId')
         res.json(dish);
     });
 })
-.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
+.delete(Verify.verifyAdmin, function(req, res, next) {
     Dish.findByIdAndRemove(req.params.dishId, function(err, resp) {
         assert.equal(err, null);
         res.json(resp);
@@ -54,6 +56,7 @@ dishRouter.route('/:dishId')
 });
 
 dishRouter.route('/:dishId/comments')
+.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
@@ -70,7 +73,7 @@ dishRouter.route('/:dishId/comments')
         });
     });
 })
-.delete(function(req, res, next) {
+.delete(Verify.verifyAdmin, function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
         for (comment of dish.comments) {
@@ -85,6 +88,7 @@ dishRouter.route('/:dishId/comments')
 });
 
 dishRouter.route('/:dishId/comments/:commentId')
+.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
