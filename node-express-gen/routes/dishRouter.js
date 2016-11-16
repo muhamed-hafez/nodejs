@@ -11,7 +11,7 @@ dishRouter.use(bodyParser.json());
 dishRouter.route('/')
 .all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
-    Dish.find({}, function(err, dishes) {
+    Dish.find({}).populate('comments.postedBy').exec(function(err, dishes) {
         assert.equal(err, null);
         res.json(dishes);
     });
@@ -33,7 +33,7 @@ dishRouter.route('/')
 dishRouter.route('/:dishId')
 .all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
-    Dish.findById(req.params.dishId, function(err, dish) {
+    Dish.findById(req.params.dishId).populate('comments.postedBy').exec(function(err, dishes) {
         assert.equal(err, null);
         res.json(dish);
     });
@@ -58,7 +58,7 @@ dishRouter.route('/:dishId')
 dishRouter.route('/:dishId/comments')
 .all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
-    Dish.findById(req.params.dishId, function(err, dish) {
+    Dish.findById(req.params.dishId).populate('comments.postedBy').exec(function(err, dish) {
         assert.equal(err, null);
         res.json(dish.comments);
     });
@@ -66,6 +66,7 @@ dishRouter.route('/:dishId/comments')
 .post(function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
+        req.body.postedBy = req.decoded._doc._id;
         dish.comments.push(req.body);
         dish.save(function(err, dish) {
             assert.equal(err, null);
@@ -90,7 +91,7 @@ dishRouter.route('/:dishId/comments')
 dishRouter.route('/:dishId/comments/:commentId')
 .all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
-    Dish.findById(req.params.dishId, function(err, dish) {
+    Dish.findById(req.params.dishId).populate('comments.postedBy').exec(function(err, dish) {
         assert.equal(err, null);
         res.json(dish.comments.id(req.params.commentId));
     });
@@ -98,22 +99,41 @@ dishRouter.route('/:dishId/comments/:commentId')
 .put(function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
-        dish.comments.id(req.params.commentId).remove();
-        dish.comments.push(req.body);
-        dish.save(function(err, dish) {
-            assert.equal(err, null);
-            res.json(dish);
-        });
+        var comment = dish.comments.id(req.params.commentId);
+
+        if (comment.postedBy.equals(req.decoded._doc._id)) {
+            comment.remove();
+            req.body.postedBy = req.decoded._doc._id;
+            dish.comments.push(req.body);
+            dish.save(function(err, dish) {
+                assert.equal(err, null);
+                res.json(dish);
+            });
+        }
+        else {
+            var err = new Error('You are not authorized to do this operation');
+            err.status = 403;
+            return next(err);
+        }
     });
 })
 .delete(function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
         assert.equal(err, null);
-        dish.comments.id(req.params.commentId).remove();
-        dish.save(function(err, dish) {
-            assert.equal(err, null);
-            res.json(dish);
-        });
+        var comment = dish.comments.id(req.params.commentId);
+
+        if (comment.postedBy.equals(req.decoded._doc._id)) {
+            comment.remove();
+            dish.save(function(err, dish) {
+                assert.equal(err, null);
+                res.json(dish);
+            });
+        }
+        else {
+            var err = new Error('You are not authorized to do this operation');
+            err.status = 403;
+            return next(err);
+        }
     });
 });
 
