@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
 
 var config = require('./config');
 var index = require('./routes/index');
@@ -14,6 +13,7 @@ var users = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
+var authenticate = require('./authenticate');
 
 var app = express();
 
@@ -24,8 +24,7 @@ app.all('*', function(req, res, next) {
     res.redirect('https://' + req.hostname + ':' + app.get('secPort') + req.url);
 });
 // connect to the database
-var url = 'mongodb://localhost:27017/conFusion';
-mongoose.connect(url);
+mongoose.connect(config.mongoURL);
 var db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'Connection error:'));
@@ -45,11 +44,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // configuring passport
-var User = require('./models/user');
 app.use(passport.initialize());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
