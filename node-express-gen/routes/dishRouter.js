@@ -1,7 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var assert = require('assert');
 var Dish = require('../models/dishes');
 var Verify = require('./verify');
 
@@ -9,64 +8,61 @@ var dishRouter = express.Router();
 dishRouter.use(bodyParser.json());
 
 dishRouter.route('/')
-.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
-    Dish.find({}).populate('comments.postedBy').exec(function(err, dishes) {
-        assert.equal(err, null);
+    Dish.find(req.query).populate('comments.postedBy').exec(function(err, dishes) {
+        if (err) return next(err);
         res.json(dishes);
     });
 })
-.post(Verify.verifyAdmin, function(req, res, next) {
+.post(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.create(req.body, function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.writeHead(200, {'Content-Type' : 'text/plain'});
         res.end('Created the dish with id ' + dish._id);
     });
 })
-.delete(Verify.verifyAdmin, function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.remove({}, function(err, resp) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(resp);
     });
 });
 
 dishRouter.route('/:dishId')
-.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
     Dish.findById(req.params.dishId).populate('comments.postedBy').exec(function(err, dishes) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(dish);
     });
 })
-.put(Verify.verifyAdmin, function(req, res, next) {
+.put(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.findByIdAndUpdate(req.params.dishId, {
         $set : req.body
     }, {
         new : true
     }, function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(dish);
     });
 })
-.delete(Verify.verifyAdmin, function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.findByIdAndRemove(req.params.dishId, function(err, resp) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(resp);
     });
 });
 
 dishRouter.route('/:dishId/comments')
-.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
     Dish.findById(req.params.dishId).populate('comments.postedBy').exec(function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(dish.comments);
     });
 })
-.post(function(req, res, next) {
+.post(Verify.verifyOrdinaryUser, function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
-        assert.equal(err, null);
-        req.body.postedBy = req.decoded._doc._id;
+        if (err) return next(err);
+        req.body.postedBy = req.decoded._id;
         dish.comments.push(req.body);
         dish.save(function(err, dish) {
             assert.equal(err, null);
@@ -74,9 +70,9 @@ dishRouter.route('/:dishId/comments')
         });
     });
 })
-.delete(Verify.verifyAdmin, function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         for (comment of dish.comments) {
             comment.remove();
         }
@@ -89,21 +85,20 @@ dishRouter.route('/:dishId/comments')
 });
 
 dishRouter.route('/:dishId/comments/:commentId')
-.all(Verify.verifyOrdinaryUser)
 .get(function(req, res, next) {
     Dish.findById(req.params.dishId).populate('comments.postedBy').exec(function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(dish.comments.id(req.params.commentId));
     });
 })
-.put(function(req, res, next) {
+.put(Verify.verifyOrdinaryUser, function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         var comment = dish.comments.id(req.params.commentId);
 
-        if (comment.postedBy.equals(req.decoded._doc._id)) {
+        if (comment.postedBy.equals(req.decoded._id)) {
             comment.remove();
-            req.body.postedBy = req.decoded._doc._id;
+            req.body.postedBy = req.decoded._id;
             dish.comments.push(req.body);
             dish.save(function(err, dish) {
                 assert.equal(err, null);
@@ -117,12 +112,12 @@ dishRouter.route('/:dishId/comments/:commentId')
         }
     });
 })
-.delete(function(req, res, next) {
+.delete(Verify.verifyOrdinaryUser, function(req, res, next) {
     Dish.findById(req.params.dishId, function(err, dish) {
-        assert.equal(err, null);
+        if (err) return next(err);
         var comment = dish.comments.id(req.params.commentId);
 
-        if (comment.postedBy.equals(req.decoded._doc._id)) {
+        if (comment.postedBy.equals(req.decoded._id)) {
             comment.remove();
             dish.save(function(err, dish) {
                 assert.equal(err, null);

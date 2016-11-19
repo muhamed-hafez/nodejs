@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
-var assert = require('assert');
 
 var User = require('../models/user');
 var Verify = require('./verify');
@@ -10,7 +9,7 @@ var Verify = require('./verify');
 /* GET users listing. */
 router.get('/', Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
     User.find({}, function(err, users) {
-        assert.equal(err, null);
+        if (err) return next(err);
         res.json(users);
     });
 });
@@ -43,7 +42,14 @@ router.post('/login', function(req, res, next) {
                     err : 'Could not log user in'
                 });
             }
-            var token = Verify.getToken(user);
+
+            var simpleUser = {
+              "_id":user._id,
+              "username":user.username,
+              "admin":user.admin
+            };
+            var token = Verify.getToken(simpleUser);
+
             return res.status(200).json({
                 status : 'Logged in succcessfully',
                 success : true,
@@ -71,7 +77,14 @@ router.get('/facebook/callback', function(req, res, next) {
                     err : 'Could not log user in'
                 });
             }
-            var token = Verify.getToken(user);
+
+            var simpleUser = {
+              "_id":user._id,
+              "username":user.username,
+              "admin":user.admin
+            };
+            var token = Verify.getToken(simpleUser);
+
             return res.status(200).json({
                 status : 'Logged in succcessfully',
                 success : true,
