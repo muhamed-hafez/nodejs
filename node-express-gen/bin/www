@@ -35,7 +35,7 @@ server.on('listening', onListening);
 
 /**
  * Create HTTPS server.
-
+ */
 var options = {
     key : fs.readFileSync('./private.key'),
     cert : fs.readFileSync('./certificate.pem')
@@ -45,8 +45,6 @@ var secureServer = https.createServer(options, app);
 secureServer.listen(securePort);
 secureServer.on('error', onError);
 secureServer.on('listening', onListening);
-
- */
 
 /**
  * Normalize a port into a number, string, or false.

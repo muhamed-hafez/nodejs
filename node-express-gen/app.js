@@ -18,14 +18,12 @@ var authenticate = require('./authenticate');
 
 var app = express();
 
-/**
 app.all('*', function(req, res, next) {
     if (req.secure) {
         return next();
     }
     res.redirect('https://' + req.hostname + ':' + app.get('secPort') + req.url);
 });
- */
 
 // connect to the database
 mongoose.connect(config.mongoURL);
